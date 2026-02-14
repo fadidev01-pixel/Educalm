@@ -54,16 +54,21 @@ export interface TTSOptions {
 }
 
 /**
- * Helper to execute Gemini calls with retry logic for 429 errors.
+ * Shared helper to execute Gemini calls with exponential backoff for 429 errors.
  */
-async function callGeminiWithRetry(fn: () => Promise<any>, retries = 3, delay = 2000): Promise<any> {
+export async function callGeminiWithRetry(fn: () => Promise<any>, retries = 3, delay = 2500): Promise<any> {
   try {
     return await fn();
   } catch (error: any) {
-    const isQuotaExceeded = error?.message?.includes('429') || error?.message?.includes('quota');
+    const errorStr = JSON.stringify(error) || error?.message || '';
+    const isQuotaExceeded = errorStr.includes('429') || 
+                            errorStr.includes('quota') || 
+                            errorStr.includes('RESOURCE_EXHAUSTED');
+    
     if (isQuotaExceeded && retries > 0) {
       console.warn(`Quota exceeded (429). Retrying in ${delay}ms... (${retries} retries left)`);
       await new Promise(r => setTimeout(r, delay));
+      // Exponential backoff: increase delay for next attempt
       return callGeminiWithRetry(fn, retries - 1, delay * 2);
     }
     throw error;
@@ -72,7 +77,7 @@ async function callGeminiWithRetry(fn: () => Promise<any>, retries = 3, delay = 
 
 /**
  * PRODUCTION-READY: Generates speech using the Gemini 2.5 Flash TTS model and auto-saves to library.
- * Now includes retry logic for robust handling of 429 Resource Exhausted errors.
+ * Includes retry logic for robust handling of 429 Resource Exhausted errors.
  */
 export async function generateGeminiSpeech(options: TTSOptions): Promise<string | undefined> {
   const settings = SettingsService.getSettings();

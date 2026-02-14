@@ -55,37 +55,44 @@ export const LibraryService = {
 
   /**
    * Deletes an item from the library.
-   * Simulates removing from Firestore (metadata) and Firebase Storage (blob).
    */
   deleteItem: async (id: string): Promise<void> => {
-    console.log(`[Firebase Simulation] Deleting Firestore document: ${id}`);
+    return LibraryService.deleteItems([id]);
+  },
+
+  /**
+   * Deletes multiple items from the library.
+   * Simulates bulk removing from Supabase Storage and Database.
+   */
+  deleteItems: async (ids: string[]): Promise<void> => {
+    console.log(`[Supabase Simulation] Deleting ${ids.length} records from database...`);
     
-    // 1. Simulate API delay for Firestore deletion
+    // 1. Simulate API delay for Database bulk deletion
     await new Promise((resolve, reject) => {
       setTimeout(() => {
-        // 5% chance of simulated failure for testing error handling
-        if (Math.random() < 0.05) reject(new Error("Cloud document sync failed. Please check your connection."));
+        // Simulated failure for testing
+        if (Math.random() < 0.02) reject(new Error("Database connection interrupted during bulk delete."));
         else resolve(null);
-      }, 400);
+      }, 600);
     });
 
-    console.log(`[Firebase Simulation] Deleting file from Firebase Storage bucket...`);
+    console.log(`[Supabase Simulation] Removing ${ids.length} files from storage bucket...`);
     
-    // 2. Simulate API delay for Storage file deletion
-    await new Promise(resolve => setTimeout(resolve, 400));
+    // 2. Simulate API delay for Storage bulk removal
+    await new Promise(resolve => setTimeout(resolve, 600));
 
     const key = LibraryService.getStoreKey();
     const items = LibraryService.getAllItems();
-    const updatedItems = items.filter(item => item.id !== id);
+    const updatedItems = items.filter(item => !ids.includes(item.id));
     localStorage.setItem(key, JSON.stringify(updatedItems));
 
-    // Cleanup Last Played metadata if it matches the deleted item
+    // Cleanup Last Played metadata if it matches any deleted item
     const lastPlayed = LibraryService.getLastPlayed();
-    if (lastPlayed && lastPlayed.id === id) {
+    if (lastPlayed && ids.includes(lastPlayed.id)) {
       localStorage.removeItem('educalm_last_played');
     }
     
-    console.log(`[Firebase Simulation] Successfully deleted item: ${id}`);
+    console.log(`[Supabase Simulation] Bulk delete complete.`);
   },
 
   setLastPlayed: (item: AudioItem): void => {

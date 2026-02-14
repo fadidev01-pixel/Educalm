@@ -4,6 +4,7 @@ import { useNavigation } from '../../core/navigation/NavigationContext';
 import { PrimaryButton } from '../../core/widgets/PrimaryButton';
 import { LoadingDialog } from '../../core/widgets/LoadingDialog';
 import { GoogleGenAI } from "@google/genai";
+import { callGeminiWithRetry } from '../../core/services/tts_service';
 
 export const LinkImportScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { push, showSnackBar } = useNavigation();
@@ -16,17 +17,18 @@ export const LinkImportScreen: React.FC<{ onBack: () => void }> = ({ onBack }) =
 
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const response = await ai.models.generateContent({
+      const response = await callGeminiWithRetry(() => ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: `Extract the main text content from this article link: ${url}. Provide only the article text, no metadata or sidebars.`,
         config: { tools: [{ googleSearch: {} }] }
-      });
+      }));
 
       const extractedText = response.text || 'Could not extract content.';
       push('/editor', { initialText: extractedText });
     } catch (error: any) {
       console.error(error);
-      if (error?.message?.includes('429')) {
+      const errorStr = JSON.stringify(error) || error?.message || '';
+      if (errorStr.includes('429') || errorStr.includes('quota')) {
         showSnackBar('Extraction limit reached. Please wait a moment and try again.');
       } else {
         showSnackBar('Failed to extract article text. Try copying the text manually.');

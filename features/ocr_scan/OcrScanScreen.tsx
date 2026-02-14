@@ -4,7 +4,7 @@ import { useNavigation } from '../../core/navigation/NavigationContext';
 import { PrimaryButton } from '../../core/widgets/PrimaryButton';
 import { LoadingDialog } from '../../core/widgets/LoadingDialog';
 import { GoogleGenAI } from "@google/genai";
-import { generateGeminiSpeech, detectLanguage } from '../../core/services/tts_service';
+import { generateGeminiSpeech, detectLanguage, callGeminiWithRetry } from '../../core/services/tts_service';
 import { SettingsService } from '../../core/services/settings_service';
 import { useI18n } from '../../core/services/i18n_service';
 
@@ -42,7 +42,7 @@ export const OcrScanScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       const base64Data = await blobToBase64(file);
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       
-      const response = await ai.models.generateContent({
+      const response = await callGeminiWithRetry(() => ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: [
           {
@@ -52,7 +52,7 @@ export const OcrScanScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             ]
           }
         ]
-      });
+      }));
 
       const text = response.text || '';
       if (text.trim()) {
@@ -63,7 +63,8 @@ export const OcrScanScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       }
     } catch (error: any) {
       console.error(error);
-      if (error?.message?.includes('429')) {
+      const errorStr = JSON.stringify(error) || error?.message || '';
+      if (errorStr.includes('429') || errorStr.includes('quota')) {
         showSnackBar('Daily limit reached. Please try again in a few minutes.');
       } else {
         showSnackBar('Scan failed. Please check your connection.');
@@ -92,7 +93,8 @@ export const OcrScanScreen: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       }
     } catch (error: any) {
       console.error(error);
-      if (error?.message?.includes('429')) {
+      const errorStr = JSON.stringify(error) || error?.message || '';
+      if (errorStr.includes('429') || errorStr.includes('quota')) {
         showSnackBar('Voice limit reached. Please wait a moment before trying again.');
       } else {
         showSnackBar('Voice generation failed.');
