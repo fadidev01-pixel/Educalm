@@ -1,0 +1,7 @@
+{
+  "name": "Educalm",
+  "description": "A clean, production-ready foundation for Educalm, featuring Material 3 inspired design, Poppins typography, and a modular feature-based architecture.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

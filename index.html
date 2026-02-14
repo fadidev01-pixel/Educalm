@@ -1,0 +1,86 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Educalm</title>
+  <!-- High Refresh Rate & Hardware Acceleration Hints -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', 'Tajawal', sans-serif;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .hw-accel {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000;
+    }
+    html, body {
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    /* RTL Adjustments for icons and layout */
+    [dir="rtl"] .rtl-flip {
+      transform: scaleX(-1);
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#7B6CF6',
+            secondary: '#9D8CFF',
+            background: '#F5F6FA',
+            cardWhite: '#FFFFFF',
+            textDark: '#1F1F1F',
+            textLight: '#6B6B6B',
+            darkBg: '#0F1115',
+            darkCard: '#1A1D24',
+            darkPrimary: '#8B7CFF',
+            darkTextPrimary: '#FFFFFF',
+            darkTextSecondary: '#9CA3AF',
+          },
+          borderRadius: {
+            'xl': '20px',
+            '3xl': '30px',
+            '4xl': '40px',
+          },
+          boxShadow: {
+            'soft': '0 4px 20px rgba(0, 0, 0, 0.05)',
+            'modern': '0 10px 40px rgba(0, 0, 0, 0.08)',
+            'glow': '0 8px 25px rgba(123, 108, 246, 0.4)',
+            'dark-soft': '0 4px 20px rgba(0, 0, 0, 0.4)',
+          }
+        }
+      }
+    }
+  </script>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.41.0"
+  }
+}
+</script>
+</head>
+<body class="bg-background dark:bg-darkBg text-textDark dark:text-darkTextPrimary overflow-x-hidden">
+  <div id="root" class="hw-accel"></div>
+</body>
+</html>
